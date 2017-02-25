@@ -10,22 +10,59 @@ class Generator(object):
         return randint(low, high)
     
     def collision(self, room, ignore):
-        for i in range(1, self.rooms.length()):
+        for i in range(1, len(self.rooms)):
             if i == ignore:
                 continue
             
             check = self.rooms[i]
-            if not ((room.x + room.h < check.x) or (room.x > check.x + check.w) or (room.y + room.h < check.y)
-                    or (room.y > check.y + check.h)):
+            if not ((room['x'] + room['h'] < check['x']) or (room['x'] > check['x'] + check['w']) 
+                    or (room['y'] + room['h'] < check['y'])
+                    or (room['y'] > check['y'] + check['h'])):
                 return True 
             return False
     
-    def squash(self):
-        pass
+    def squash(self, room):
+        for i in range(0,10):
+            for j in range(0, len(room)):
+                room = self.rooms[j]
+                while True:
+                    old_position = {
+                        'x': room['x'],
+                        'y': room['y']
+                        }
+                    if room['x'] > 1:
+                        room['x'] -= 1
+                    if room['y'] > 1:
+                        room['y'] -= 1
+                    if room['x'] == 1 and room['y'] == 1:
+                        break
+                    if self.collision(room, j):
+                        room['x'] = old_position['x']
+                        room['y'] = old_position['y']
+                        break
     
-    def find_closest(self):
-        pass
-    
+    def find_closest(self, room):
+        middle = {
+            'x': room['x'] + (room['w']/2),
+            'y': room['y'] + (room['h']/2),
+            }
+        closest = None
+        closest_distance = 1000
+        for i in range(0, len(self.rooms)):
+            check = self.rooms[i]
+            check_mid = {
+                'x': check['x'] + (check['w']/2),
+                'y': check['y'] + (check['h']/2),
+                }
+            if check == room:
+                continue
+            distance = min(abs(middle['x'] - check_mid['x']) - (room['w']/2) - (check['w']/2), 
+                           abs(middle['y'] - check_mid['y']) - (room['h']/2) -(check['h']/2))
+            if distance < closest_distance:
+                closest_distance = distance
+                closest = check
+        return closest 
+        
     def room_gen(self):
         
         self.data = []
@@ -42,12 +79,60 @@ class Generator(object):
         
         for i in range (0, room_count):
             room = {}
-            room.x = self.randomizer(1, (self.data_size-max_size-1))
-            room.y = self.randomizer(1, (self.data_size-max_size-1))        
-            room.w = self.randomizer(min_size, max_size)
-            room.h = self.randomizer(min_size, max_size)
-            i += 1
+            room['x'] = self.randomizer(1, (self.data_size-max_size-1))
+            room['y'] = self.randomizer(1, (self.data_size-max_size-1))        
+            room['w'] = self.randomizer(min_size, max_size)
+            room['h'] = self.randomizer(min_size, max_size)
+            
+            if self.collision(room,i):
+                i -= 1
+                continue
+            
+            room['w'] -= 1
+            room['h'] -= 1
+            self.rooms.append(room)
+                
+        self.squash(room)
         
+        for i in range(0, room_count):
+            roomA = self.rooms[i]
+            roomB = self.find_closest(roomA)
+            
+            pointA = {
+                'x': self.randomizer(roomA['x'], roomA['x'] + roomA['w']),
+                'y': self.randomizer(roomA['y'], roomA['y'] + roomA['h'])}
+            pointB = {
+                'x': self.randomizer(roomB['x'], roomB['x'] + roomB['w']),
+                'y': self.randomizer(roomB['y'], roomB['y'] + roomB['h'])
+                }
+            
+            while pointB['x'] != pointA['x'] or pointB['y'] + pointA['y']:
+                if pointB['x'] != pointA['x']:
+                    if pointB['x'] > pointA['x']:
+                        pointB['x'] -= 1
+                    else:
+                        pointB['x'] += 1
+                elif pointB['y'] + pointA['y']:
+                    if pointB['y'] > pointA['y']:
+                        pointB['y'] -= 1
+                    else:
+                        pointB['y'] += 1
+                self.data[pointB['x']][pointB['y']] = 1
+        
+        for i in range(0,self.room_count):
+            room = self.rooms[i]
+            for x in range (room['x'], room['x'] + room['w']):
+                for y in range (room['y'], room['y'] + room['h']):
+                    self.data[x][y] = 1
+        
+        for x in range (0, self.data_size):
+            for y in range (0, self.data_size):
+                if self.data[x][y] == 1:
+                    for xWall in range(x-1, x+1):
+                        for yWall in range(y-1, y+1):
+                            if self.data[xWall][yWall] == None:
+                                self.data[xWall][yWall] = 2
+                    
         return self.data
     
 
