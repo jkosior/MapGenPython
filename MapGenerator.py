@@ -90,11 +90,13 @@ class Generator(object):
             
             room['w'] -= 1
             room['h'] -= 1
-            self.rooms.append(room)  
+            self.rooms.append(room)
+        
+        
         self.squash()
         
 #         list index out of range
-        for l in range(0, room_count):
+        for l in range(0, len(self.rooms)):
             roomA = self.rooms[l]
             roomB = self.find_closest(roomA)
             
@@ -120,7 +122,7 @@ class Generator(object):
                         pointB['y'] += 1
                 self.data[pointB['x']][pointB['y']] = 1
         
-        for m in range(0,room_count):
+        for m in range(0,len(self.rooms)):
             room = self.rooms[m]
             for x in range (room['x'], room['x'] + room['w']):
                 for y in range (room['y'], room['y'] + room['h']):
@@ -129,8 +131,8 @@ class Generator(object):
         for X in range (0, self.data_size):
             for Y in range (0, self.data_size):
                 if self.data[X][Y] == 1:
-                    for xWall in range(X-1, X+1):
-                        for yWall in range(Y-1, Y+1):
+                    for xWall in range(X-1, X+2):
+                        for yWall in range(Y-1, Y+2):
                             if self.data[xWall][yWall] == None:
                                 self.data[xWall][yWall] = 2
         
