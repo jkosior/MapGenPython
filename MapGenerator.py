@@ -3,7 +3,7 @@ from random import randint
 
 class Generator(object):
     data = []
-    data_size = 128
+    data_size = 32
     rooms = []
     
     def randomizer(self, low,high):
@@ -21,9 +21,9 @@ class Generator(object):
                 return True 
             return False
     
-    def squash(self, room):
+    def squash(self):
         for i in range(0,10):
-            for j in range(0, len(room)):
+            for j in range(0, len(self.rooms)):
                 room = self.rooms[j]
                 while True:
                     old_position = {
@@ -77,26 +77,26 @@ class Generator(object):
         min_size = 5
         max_size = 15
         
-        for i in range (0, room_count):
+        for k in range (0, room_count):
             room = {}
             room['x'] = self.randomizer(1, (self.data_size-max_size-1))
             room['y'] = self.randomizer(1, (self.data_size-max_size-1))        
             room['w'] = self.randomizer(min_size, max_size)
             room['h'] = self.randomizer(min_size, max_size)
             
-            if self.collision(room,i):
-                i -= 1
+            if self.collision(room,k):
+                k -= 1
                 continue
             
             room['w'] -= 1
             room['h'] -= 1
-            self.rooms.append(room)
-                
-        self.squash(room)
+        self.rooms.append(room)    
+        self.squash()
         
-        for i in range(0, room_count):
-            roomA = self.rooms[i]
+        for l in range(0, room_count):
+            roomA = self.rooms[l]
             roomB = self.find_closest(roomA)
+            
             
             pointA = {
                 'x': self.randomizer(roomA['x'], roomA['x'] + roomA['w']),
@@ -106,40 +106,43 @@ class Generator(object):
                 'y': self.randomizer(roomB['y'], roomB['y'] + roomB['h'])
                 }
             
-            while pointB['x'] != pointA['x'] or pointB['y'] + pointA['y']:
+            while pointB['x'] != pointA['x'] or pointB['y'] != pointA['y']:
                 if pointB['x'] != pointA['x']:
                     if pointB['x'] > pointA['x']:
                         pointB['x'] -= 1
                     else:
                         pointB['x'] += 1
-                elif pointB['y'] + pointA['y']:
+                elif pointB['y'] != pointA['y']:
                     if pointB['y'] > pointA['y']:
                         pointB['y'] -= 1
                     else:
                         pointB['y'] += 1
                 self.data[pointB['x']][pointB['y']] = 1
         
-        for i in range(0,self.room_count):
-            room = self.rooms[i]
+        for m in range(0,room_count):
+            room = self.rooms[m]
             for x in range (room['x'], room['x'] + room['w']):
                 for y in range (room['y'], room['y'] + room['h']):
                     self.data[x][y] = 1
         
-        for x in range (0, self.data_size):
-            for y in range (0, self.data_size):
-                if self.data[x][y] == 1:
-                    for xWall in range(x-1, x+1):
-                        for yWall in range(y-1, y+1):
+        for X in range (0, self.data_size):
+            for Y in range (0, self.data_size):
+                if self.data[X][Y] == 1:
+                    for xWall in range(X-1, X+1):
+                        for yWall in range(Y-1, Y+1):
                             if self.data[xWall][yWall] == None:
                                 self.data[xWall][yWall] = 2
-                    
+        
         return self.data
     
 
 
-g = Generator()
-print(g.room_gen())
+def main():
+    g = Generator().room_gen()
+    print(g)
 
+if __name__ == "__main__":
+    main()
 
 
  
