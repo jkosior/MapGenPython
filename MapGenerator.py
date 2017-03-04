@@ -93,32 +93,32 @@ class Generator(object):
             self.rooms.append(room)  
         self.squash()
         
+#         list index out of range
         for l in range(0, room_count):
             roomA = self.rooms[l]
-            if l != 0:
-                roomB = self.find_closest(roomA)
-                
-                
-                pointA = {
-                    'x': self.randomizer(roomA['x'], roomA['x'] + roomA['w']),
-                    'y': self.randomizer(roomA['y'], roomA['y'] + roomA['h'])}
-                pointB = {
-                    'x': self.randomizer(roomB['x'], roomB['x'] + roomB['w']),
-                    'y': self.randomizer(roomB['y'], roomB['y'] + roomB['h'])
-                    }
-                
-                while pointB['x'] != pointA['x'] or pointB['y'] != pointA['y']:
-                    if pointB['x'] != pointA['x']:
-                        if pointB['x'] > pointA['x']:
-                            pointB['x'] -= 1
-                        else:
-                            pointB['x'] += 1
-                    elif pointB['y'] != pointA['y']:
-                        if pointB['y'] > pointA['y']:
-                            pointB['y'] -= 1
-                        else:
-                            pointB['y'] += 1
-                    self.data[pointB['x']][pointB['y']] = 1
+            roomB = self.find_closest(roomA)
+            
+            
+            pointA = {
+                'x': self.randomizer(roomA['x'], roomA['x'] + roomA['w']),
+                'y': self.randomizer(roomA['y'], roomA['y'] + roomA['h'])}
+            pointB = {
+                'x': self.randomizer(roomB['x'], roomB['x'] + roomB['w']),
+                'y': self.randomizer(roomB['y'], roomB['y'] + roomB['h'])
+                }
+            
+            while pointB['x'] != pointA['x'] or pointB['y'] != pointA['y']:
+                if pointB['x'] != pointA['x']:
+                    if pointB['x'] > pointA['x']:
+                        pointB['x'] -= 1
+                    else:
+                        pointB['x'] += 1
+                elif pointB['y'] != pointA['y']:
+                    if pointB['y'] > pointA['y']:
+                        pointB['y'] -= 1
+                    else:
+                        pointB['y'] += 1
+                self.data[pointB['x']][pointB['y']] = 1
         
         for m in range(0,room_count):
             room = self.rooms[m]
